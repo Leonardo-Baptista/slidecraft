@@ -23,6 +23,11 @@ IA**.
   <img src="docs/img/exemplo.jpg" width="620" alt="Os quatro primeiros slides do deck de exemplo, no modelo IFES">
 </p>
 
+Para ver tudo funcionando de uma vez, gere `decks/padrao`: doze slides que
+apresentam as regras deste repositório seguindo cada uma delas, com o antes e
+depois dos vícios de IA, números que sobem, linha do tempo, GIF, vídeo e
+Morph.
+
 ---
 
 ## O que o kit entrega
@@ -165,6 +170,7 @@ slidecraft/
 │                        transição, números, importação, medição de texto
 ├── decks/
 │   ├── _modelo/             ponto de partida de todo deck novo (IFES)
+│   ├── padrao/              o padrão do repositório, apresentado dentro dele
 │   ├── exemplo/             um slide de cada recurso, tema fictício
 │   ├── exemplo_importado/   apresentação simples reformulada, design mantido
 │   └── demonstracao/        catálogo da identidade escuro

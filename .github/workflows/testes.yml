@@ -51,6 +51,12 @@ jobs:
           python decks/exemplo/build.py
           python scripts/validar_deck.py saida/exemplo.pptx
 
+      - name: Gerar e validar o deck do padrão
+        run: |
+          python decks/padrao/gera_ativos.py
+          python decks/padrao/build.py
+          python scripts/validar_deck.py saida/padrao.pptx
+
       - name: Reformular a apresentação de exemplo mantendo o design
         run: |
           python decks/exemplo_importado/gera_ativos.py

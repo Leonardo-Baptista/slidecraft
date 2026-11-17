@@ -116,7 +116,8 @@ imagem, GIF, vídeo, Morph). Só gere depois que a pessoa aprovar.
    em `kit/layouts_ifes.py`: `linha_do_tempo(s, marcos)` e
    `cartoes_de_numeros(s, blocos, AQUI / "video")`.
 
-   Para a identidade `escuro`, use `decks/demonstracao/build.py` e
+   Para ver todas as regras juntas num deck só, gere `decks/padrao`. Para a
+   identidade `escuro`, use `decks/demonstracao/build.py` e
    `kit/layouts.py` (sete composições prontas).
 5. Rode tudo de uma vez:
    ```
