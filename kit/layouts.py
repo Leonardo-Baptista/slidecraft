@@ -24,7 +24,7 @@ from kit import base
 from kit.base import (A, BRANCO, CINZA, CINZA_CLARO, CINZA_ESCURO, CINZA_MEDIO,
                       FUNDO_CLARO, L, MARGEM, PRETO,
                       QUASE_PRETO, TURQUESA, TURQUESA_CLARO, VERDE_ESCURO,
-                      abaixo_de, filete, kicker, linha_apoio, marcadores,
+                      abaixo_de, kicker, linha_apoio, marcadores,
                       retangulo, texto, titulo)
 from kit.coreografia import FADE, WIPE_CIMA, WIPE_ESQUERDA, barra_de_progresso, efeitos_de_formas
 from kit.animacao import monta_timing
@@ -65,7 +65,6 @@ def capa(prs, titulo_principal, subtitulo=None, foto=None, rodape=None,
     if foto:
         s.shapes.add_picture(base.foto(foto, 2400, 1350, 0.55, 0.72),
                              0, 0, L, A)
-    filete(s, MARGEM, Inches(2.75))
     tit = titulo(s, MARGEM, Inches(3.08), titulo_principal, tamanho=tamanho,
                  largura=Inches(9.4))
     if subtitulo:
@@ -161,10 +160,9 @@ def comparacao(prs, indice, titulo_slide, esquerda, direita, apoio=None,
     _quantidade(esquerda[1], 1, 4, "Coluna esquerda")
     _quantidade(direita[1], 1, 4, "Coluna direita")
     s = novo(prs, BRANCO, indice)
-    fil = filete(s, MARGEM, Inches(0.85))
     tit = titulo(s, MARGEM, Inches(1.12), titulo_slide, cor=PRETO, tamanho=32,
                  largura=Inches(9.0))
-    grupos = [(0, [fil, tit])]
+    grupos = [(0, [tit])]
     if apoio:
         grupos.append((300, [linha_apoio(s, MARGEM,
                                          Inches(abaixo_de(tit, 1.95)), apoio,
@@ -210,10 +208,9 @@ def faixa_de_etapas(prs, indice, titulo_slide, etapas, apoio=None, fecho=None,
     """
     _quantidade(etapas, 2, 4 if escada else 6, "Faixa de etapas")
     s = novo(prs, BRANCO if claro else PRETO, indice)
-    fil = filete(s, MARGEM, Inches(0.85))
     tit = titulo(s, MARGEM, Inches(1.12), titulo_slide,
                  cor=PRETO if claro else BRANCO, tamanho=32, largura=Inches(10.0))
-    grupos = [(0, [fil, tit])]
+    grupos = [(0, [tit])]
     if apoio:
         grupos.append((300, [linha_apoio(s, MARGEM,
                                          Inches(abaixo_de(tit, 1.95)), apoio,
@@ -370,8 +367,8 @@ def provocacao(prs, pergunta, destaque=None, chamada=None, tamanho=40):
                                        negrito=True, entrelinha=1.12)
     titulo(s, MARGEM, Inches(y), pergunta, tamanho=tamanho, largura=Inches(11.0))
     if chamada:
-        retangulo(s, MARGEM, Inches(6.35), Pt(3), Inches(0.34), TURQUESA)
-        texto(s, MARGEM + Inches(0.22), Inches(6.4), Inches(9.5), Inches(0.3),
+        # Sem barra lateral: a cor e o negrito já separam a chamada.
+        texto(s, MARGEM, Inches(6.4), Inches(9.5), Inches(0.3),
               chamada, 12, TURQUESA, negrito=True)
     return s
 
@@ -387,7 +384,6 @@ def fechamento(prs, frase, contato=None, complemento=None, foto=None,
     s = novo(prs, PRETO)
     if foto:
         s.shapes.add_picture(base.foto(foto, 2400, 1350, 0.38, 0.7), 0, 0, L, A)
-    filete(s, MARGEM, Inches(2.6))
     tit = titulo(s, MARGEM, Inches(2.93), frase, tamanho=32, largura=Inches(9.6))
     y_contato = abaixo_de(tit, 5.3, folga=0.22)
     if contato:

@@ -44,7 +44,7 @@ def main():
     capa(prs, "Catálogo de composições",
          "As sete composições do kit, em uma apresentação",
          foto="capa_demo.jpg",
-         rodape="Kit de apresentações  |  uso interno")
+         rodape="slidecraft  |  catálogo da identidade escuro")
 
     texto_com_foto(
         prs, 2, "Texto com foto,\na composição mais usada",
