@@ -16,6 +16,8 @@ coreografia. A animação em si continua sendo a do kit:
     t, sub = cabecalho(s, "Título do slide", "Uma linha de contexto.")
     anima(s, [(0, [t]), (200, [sub])])
 """
+from pathlib import Path
+
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_ANCHOR, PP_ALIGN
@@ -365,3 +367,81 @@ def abaixo_de(forma_acima, conteudo, largura, tamanho, negrito=False,
     return (pol(forma_acima.top)
             + altura_medida(conteudo, largura, tamanho, negrito, entrelinha)
             + folga)
+
+
+# ------------------------------------------------- composições com movimento
+
+def linha_do_tempo(slide, marcos, inicio=520, y_barra=3.02):
+    """Marcos sobre uma barra que preenche da esquerda para a direita.
+
+    marcos: lista de (etiqueta, nome, descricao), de 2 a 5. Cada marco entra
+    no instante em que a barra passa por ele. Devolve a lista de efeitos,
+    para somar com os do cabeçalho e entregar a `monta_timing`:
+
+        t, sub = cabecalho(s, "Título", "Subtítulo")
+        ef = efeitos_de_formas([(0, [t]), (240, [sub])])
+        monta_timing(s, ef + linha_do_tempo(s, marcos))
+    """
+    from pptx.dml.color import RGBColor
+    from kit.animacao import DURACAO_BARRA
+    from kit.coreografia import (FADE, WIPE_ESQUERDA, barra_de_progresso,
+                                 efeitos_de_formas, marcos_na_passagem)
+
+    if not 2 <= len(marcos) <= 5:
+        raise ValueError("Linha do tempo: use de 2 a 5 marcos.")
+    passo = T.UTIL / len(marcos)
+    largura = passo - 0.3
+    grupos, centros = [], []
+    for i, (etiqueta, nome, descricao) in enumerate(marcos):
+        x = T.MARGEM + i * passo
+        centro = x + 0.10
+        centros.append(centro)
+        atual = i == len(marcos) - 1
+        grupos.append([
+            chip(slide, x, y_barra - 1.16, 0.95, 0.30, etiqueta,
+                 T.VERDE_2 if atual else T.VERDE_1),
+            texto(slide, x, y_barra - 0.76, largura, 0.30, nome, 13.5, T.VERDE_1,
+                  negrito=True),
+            forma(slide, centro - 0.10, y_barra - 0.08, 0.20, 0.20, T.VERDE_1,
+                  tipo=MSO_SHAPE.OVAL),
+            texto(slide, x, y_barra + 0.32, largura, 0.80, descricao,
+                  T.CORPO["texto"], T.TEXTO, entrelinha=1.2)])
+    barra = barra_de_progresso(slide, y_barra, T.MARGEM, T.DIREITA,
+                               cor=RGBColor.from_string(T.VERDE_2))
+    atrasos = marcos_na_passagem(barra, centros, DURACAO_BARRA)
+    efeitos = efeitos_de_formas([(inicio, [barra])], tipo=WIPE_ESQUERDA,
+                                duracao=DURACAO_BARRA)
+    efeitos += efeitos_de_formas(
+        [(inicio + a, g) for a, g in zip(atrasos, grupos)], tipo=FADE,
+        duracao=380)
+    return efeitos
+
+
+def cartoes_de_numeros(slide, blocos, pasta, y=1.95, inicio=500, corpo_numero=48):
+    """Até três cartões com o número estratégico entrando contando.
+
+    blocos: lista de (rotulo, valor, formatar, legenda); `formatar` vem de
+    `kit.numeros` (inteiro, porcentagem()). `pasta` recebe os clipes, em geral
+    AQUI / "video". Devolve (grupos, filmes): os grupos vão para `anima`, e
+    os filmes para `tocar_junto`, sempre depois do `anima`.
+    """
+    from kit.numeros import numero_que_sobe
+
+    if not 1 <= len(blocos) <= 3:
+        raise ValueError("Cartões de números: no máximo três por slide.")
+    grupos, filmes = [], []
+    for i, (nome, valor, formatar, legenda) in enumerate(blocos):
+        x = T.MARGEM + i * (T.COLUNA_3 + T.FOLGA)
+        nivel = i + 1
+        c = cartao(slide, x, y, T.COLUNA_3, 2.45, nivel)
+        r = rotulo(slide, x + 0.25, y + 0.23, nome)
+        n = numero_que_sobe(slide, Path(pasta) / ("numero_%d_%d.mp4" % (
+            len(slide.part.package.presentation_part.presentation.slides), i)),
+            x + 0.25, y + 0.60, T.COLUNA_3 - 0.5, 0.95, ate=valor,
+            formatar=formatar, corpo=corpo_numero, cor=T.VERDE_2,
+            fundo=T.CARTOES[nivel - 1][0])
+        l = corpo(slide, x + 0.25, y + 1.67, T.COLUNA_3 - 0.5, 0.5, legenda)
+        atraso = inicio + i * 350
+        grupos.append((atraso, [c, r, n, l]))
+        filmes.append((n, atraso))
+    return grupos, filmes

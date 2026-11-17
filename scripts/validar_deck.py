@@ -260,22 +260,40 @@ def analisa(caminho, detalhe=False, perfil_pedido=None):
     if identidade not in IDENTIDADES:
         rel.erro(0, "identidade desconhecida: %s" % identidade)
         identidade = "escuro"
-    grade = GRADES[identidade]
-    paleta = paleta_de(identidade)
-    fontes_permitidas = set(fontes_de(identidade)) | {None}
+    largura_slide, altura_slide = LARGURA, ALTURA
+    tema = conferir_tema(caminho)
+    if identidade == "importada":
+        # O design é o da pessoa: paleta, fontes, margens e tamanho saem do
+        # próprio arquivo, e não de uma identidade do kit.
+        from kit.importado import design
+        d = design(prs)
+        grade = {"esquerda": Inches(float(meta.get("margem_e", 0.5))),
+                 "direita": Inches(float(meta.get("margem_d", 0.5))),
+                 "familia": "arial"}
+        paleta = set(d["cores"].values()) | {"000000", "FFFFFF"}
+        fontes_permitidas = {d["fontes"]["titulo"], d["fontes"]["corpo"], None}
+        fonte_do_tema = {"majorFont": d["fontes"]["titulo"],
+                         "minorFont": d["fontes"]["corpo"]}
+        largura_slide, altura_slide = prs.slide_width, prs.slide_height
+    else:
+        grade = GRADES[identidade]
+        paleta = paleta_de(identidade)
+        fontes_permitidas = set(fontes_de(identidade)) | {None}
+        fonte_do_tema = {"majorFont": grade["fonte_do_tema"],
+                         "minorFont": grade["fonte_do_tema"]}
     familia = grade["familia"]
 
-    if (abs(prs.slide_width - LARGURA) > TOLERANCIA_FORMATO
+    if identidade != "importada" and (
+            abs(prs.slide_width - LARGURA) > TOLERANCIA_FORMATO
             or abs(prs.slide_height - ALTURA) > TOLERANCIA_FORMATO):
         rel.erro(0, "formato %s x %s, o padrão e 16:9 de 13,333 por 7,5 polegadas"
                  % (round(prs.slide_width / 914400, 2),
                     round(prs.slide_height / 914400, 2)))
 
-    tema = conferir_tema(caminho)
     for papel_fonte, rotulo in (("majorFont", "títulos"), ("minorFont", "corpo")):
-        if tema.get(papel_fonte) != grade["fonte_do_tema"]:
+        if tema.get(papel_fonte) != fonte_do_tema[papel_fonte]:
             rel.erro(0, "fonte de %s do tema em %s, deveria ser %s"
-                     % (rotulo, tema.get(papel_fonte), grade["fonte_do_tema"]))
+                     % (rotulo, tema.get(papel_fonte), fonte_do_tema[papel_fonte]))
 
     linhas = []
     nomes = sorted((n for n in z.namelist()
@@ -308,10 +326,10 @@ def analisa(caminho, detalhe=False, perfil_pedido=None):
                 invade_esquerda = (forma.left < grade["esquerda"] - FOLGA_MARGEM
                                    and forma.left > FOLGA_MARGEM)
                 invade_direita = (
-                    direita > LARGURA - grade["direita"] + FOLGA_MARGEM
-                    and direita < LARGURA - FOLGA_MARGEM)
+                    direita > largura_slide - grade["direita"] + FOLGA_MARGEM
+                    and direita < largura_slide - FOLGA_MARGEM)
                 sai_do_slide = (forma.top < -FOLGA_MARGEM
-                                or baixo > ALTURA + FOLGA_MARGEM)
+                                or baixo > altura_slide + FOLGA_MARGEM)
                 if invade_esquerda or invade_direita or sai_do_slide:
                     fora += 1
 

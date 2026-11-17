@@ -37,6 +37,22 @@ def _rgb(valor):
     return tuple(int(texto[i:i + 2], 16) for i in (0, 2, 4))
 
 
+def _familia(slide):
+    """Família do número: a mesma do texto ao redor, conforme a identidade."""
+    from kit.politica import identidade_de
+    try:
+        prs = slide.part.package.presentation_part.presentation
+        identidade = identidade_de(prs)
+    except AttributeError:
+        return None
+    if identidade == "escuro":
+        return "Montserrat"
+    if identidade == "importada":
+        from kit.importado import design
+        return design(prs)["fontes"]["corpo"]
+    return "Arial"
+
+
 def inteiro(valor):
     """1250 vira 1.250."""
     return "{:,}".format(int(round(valor))).replace(",", ".")
@@ -57,11 +73,13 @@ def numero_que_sobe(slide, clipe, x, y, largura, altura, ate, corpo, cor,
     x, y, largura e altura em polegadas. `fundo` precisa ser a cor exata do
     que está atrás (cartão ou slide), senão o clipe aparece como retângulo.
     O filme entra na coreografia como qualquer forma; o comando de tocar é
-    ligado por `tocar_junto`, depois do `anima`.
+    ligado por `tocar_junto`, depois do `anima`. Sem `fonte`, usa a família
+    da identidade do arquivo: Arial no `ifes`, Montserrat no `escuro` e a
+    fonte do tema na `importada`.
     """
     clipe = Path(clipe)
     clipe.parent.mkdir(parents=True, exist_ok=True)
-    fonte = Path(fonte) if fonte else fonte_do_sistema()
+    fonte = Path(fonte) if fonte else fonte_do_sistema(_familia(slide))
     cor, alvo = _rgb(cor), _rgb(fundo)
     w = int(largura * PIXELS_POR_POLEGADA) // 2 * 2
     h = int(altura * PIXELS_POR_POLEGADA) // 2 * 2

@@ -742,3 +742,94 @@ def test_validador_recusa_a_paleta_escura_em_deck_do_ifes(tmp_path):
     codigo, saida = _validar(arquivo)
     assert codigo == 2
     assert "fora da paleta" in saida
+
+
+# ------------------------------------------------- apresentação importada
+
+def _origem(tmp_path):
+    """Um .pptx "da pessoa": tema próprio, um slide com título e lista."""
+    from pptx import Presentation
+    from kit.tema import aplicar_tema
+
+    prs = Presentation()
+    aplicar_tema(prs, fonte="Georgia", cores={"accent1": "E07A1F",
+                                              "lt2": "EEF1F6"})
+    s = prs.slides.add_slide(prs.slide_layouts[1])
+    s.shapes.title.text = "Resultados"
+    s.placeholders[1].text_frame.text = "um\ndois"
+    s.notes_slide.notes_text_frame.text = "nota"
+    caminho = tmp_path / "origem.pptx"
+    prs.save(str(caminho))
+    return caminho
+
+
+def test_extrair_tira_titulo_texto_e_notas(tmp_path):
+    import json
+    from kit.importado import extrair
+
+    conteudo = json.loads(extrair(_origem(tmp_path), tmp_path / "deck")
+                          .read_text(encoding="utf-8"))
+    slide = conteudo["slides"][0]
+    assert slide["titulo"] == "Resultados"
+    assert [p["texto"] for p in slide["textos"][0]] == ["um", "dois"]
+    assert slide["notas"] == "nota"
+
+
+def test_modelo_importado_mantem_o_design_e_passa_no_validador(tmp_path):
+    from kit.importado import abrir_modelo, design, itens, novo, titulo
+    from kit.politica import identidade_de
+    from kit.slides import anima
+
+    prs = abrir_modelo(_origem(tmp_path))
+    assert len(prs.slides._sldIdLst) == 0
+    assert identidade_de(prs) == "importada"
+    d = design(prs)
+    assert d["fontes"]["corpo"] == "Georgia"
+    assert d["cores"]["accent1"] == "E07A1F"
+    s = novo(prs)
+    t = titulo(s, "Um assunto por slide")
+    linhas = itens(s, d["margem_esquerda"], 2.0, 6.0, ["um", "dois"])
+    anima(s, [(0, [t])] + [(300, l) for l in linhas])
+    aplicar_em_todos(prs)
+    arquivo = tmp_path / "importado.pptx"
+    prs.save(str(arquivo))
+
+    codigo, saida = _validar(arquivo)
+    assert codigo == 0, saida
+    assert "identidade: importada" in saida
+
+
+def test_importada_recusa_cor_fora_do_tema(tmp_path):
+    from kit.importado import abrir_modelo, novo, retangulo, titulo
+
+    prs = abrir_modelo(_origem(tmp_path))
+    s = novo(prs)
+    titulo(s, "Título")
+    retangulo(s, 1.0, 2.0, 2.0, 1.0, "00E5C0")
+    aplicar_em_todos(prs)
+    arquivo = tmp_path / "fora.pptx"
+    prs.save(str(arquivo))
+    codigo, saida = _validar(arquivo)
+    assert codigo == 2
+    assert "fora da paleta" in saida
+
+
+def test_linha_do_tempo_ifes_usa_wipe_e_fica_na_area_util(tmp_path):
+    from kit.animacao import monta_timing
+    from kit.layouts_ifes import linha_do_tempo, novo
+    from kit.tema_ifes import nova_apresentacao_ifes
+
+    prs = nova_apresentacao_ifes()
+    s = novo(prs)
+    efeitos = linha_do_tempo(s, [("2024", "Um", "Primeiro marco."),
+                                 ("2025", "Dois", "Segundo marco."),
+                                 ("2026", "Três", "Terceiro marco.")])
+    assert any(e[1] == "wipe(left)" for e in efeitos)
+    monta_timing(s, efeitos)
+    aplicar_em_todos(prs)
+    arquivo = tmp_path / "linha.pptx"
+    prs.save(str(arquivo))
+    codigo, saida = _validar(arquivo)
+    assert codigo == 0, saida
+    with pytest.raises(ValueError):
+        linha_do_tempo(novo(prs), [("1", "só um", "")])

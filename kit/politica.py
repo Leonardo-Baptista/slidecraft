@@ -4,6 +4,8 @@ Uma identidade é o conjunto fechado de cores e fontes que um material pode
 usar. São duas: `ifes`, o modelo público de apresentação do IFES, que é o
 ponto de partida de todo deck novo (`decks/_modelo`), e `escuro`, fundo preto
 com acento turquesa e Montserrat, para palestra com foto em tela cheia. A
+terceira, `importada`, é o design de uma apresentação que a pessoa já tinha
+(`kit/importado.py`): paleta e fontes saem do tema do próprio arquivo. A
 `ifes` mora em `kit/tema_ifes.py` e é lida daqui sob demanda, para não criar
 importação circular.
 
@@ -24,7 +26,7 @@ PALETA = frozenset({
 })
 FONTES = frozenset({"Montserrat"})
 IDENTIDADE_PADRAO = "escuro"
-IDENTIDADES = ("escuro", "ifes")
+IDENTIDADES = ("escuro", "ifes", "importada")
 
 
 def paleta_de(identidade=IDENTIDADE_PADRAO):

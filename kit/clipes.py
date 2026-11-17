@@ -19,8 +19,8 @@ QUADROS_POR_SEGUNDO = 15
 QUALIDADE = 26  # crf do libx264: quanto menor, melhor e mais pesado
 
 
-# Arial em negrito, procurada nos lugares de costume de cada sistema. Quem
-# usa a identidade `escuro` passa o caminho da Montserrat em `fonte`.
+# Arial em negrito nos lugares de costume de cada sistema: a reserva quando a
+# família pedida não está instalada.
 CANDIDATAS = (
     "C:/Windows/Fonts/arialbd.ttf",
     "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
@@ -29,10 +29,49 @@ CANDIDATAS = (
     "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
 )
+PASTAS_DE_FONTE = (
+    Path("C:/Windows/Fonts"),
+    Path.home() / "AppData" / "Local" / "Microsoft" / "Windows" / "Fonts",
+    Path("/Library/Fonts"), Path.home() / "Library" / "Fonts",
+    Path("/System/Library/Fonts/Supplemental"),
+    Path("/usr/share/fonts"), Path.home() / ".local" / "share" / "fonts",
+    Path.home() / ".fonts",
+)
 
 
-def fonte_do_sistema(candidatas=CANDIDATAS):
-    """Primeira fonte em negrito que existir nesta máquina."""
+def _procura(familia):
+    """Arquivo da família em negrito, lendo o nome gravado dentro da fonte."""
+    alvo = familia.lower().replace(" ", "")
+    for pasta in PASTAS_DE_FONTE:
+        if not pasta.exists():
+            continue
+        for arquivo in pasta.rglob("*"):
+            if arquivo.suffix.lower() not in (".ttf", ".otf"):
+                continue
+            # Filtro barato pelo nome do arquivo antes de abrir a fonte.
+            if not arquivo.stem.lower().replace(" ", "").replace(
+                    "-", "").startswith(alvo[:4]):
+                continue
+            try:
+                nome, estilo = ImageFont.truetype(str(arquivo), 10).getname()
+            except OSError:
+                continue
+            if (nome.lower().replace(" ", "") == alvo
+                    and estilo.lower() in ("bold", "negrito")):
+                return arquivo
+    return None
+
+
+def fonte_do_sistema(familia=None, candidatas=CANDIDATAS):
+    """Fonte em negrito da família pedida; sem ela, a primeira reserva.
+
+    Montserrat é gratuita (Google Fonts) e precisa estar instalada para os
+    números da identidade `escuro` saírem na mesma fonte do resto do slide.
+    """
+    if familia:
+        achada = _procura(familia)
+        if achada:
+            return achada
     for caminho in candidatas:
         if Path(caminho).exists():
             return Path(caminho)
