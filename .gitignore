@@ -1,0 +1,31 @@
+# ambiente
+.venv/
+__pycache__/
+*.py[cod]
+
+# apresentações geradas: o repositório carrega o kit, não os arquivos prontos
+saida/
+*.pptx
+*.potx
+*.ppsx
+~$*
+
+# material de cada deck: imagens, GIFs e vídeos ficam na sua máquina
+decks/*/assets/*
+!decks/*/assets/.gitkeep
+decks/*/cache/
+decks/*/video/
+kit/cache/*
+!kit/cache/.gitkeep
+
+# mídia bruta
+*.mp4
+*.mov
+*.avi
+*.NEF
+*.CR2
+
+# resto
+*.log
+Thumbs.db
+.DS_Store

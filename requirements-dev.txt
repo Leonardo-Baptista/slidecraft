@@ -1,0 +1,6 @@
+# Dependencias de desenvolvimento. Não precisa para gerar apresentação,
+# precisa para mexer no kit.
+-r requirements.txt
+
+# Suite de testes do kit
+pytest==9.1.1

@@ -1,0 +1,52 @@
+# Roda a suite do kit a cada push e em cada pull request.
+#
+# O kit e compartilhado: uma mudanca nele muda todos os decks futuros. Este
+# fluxo existe para que quem mexer descubra o problema aqui, e não na frente
+# da plateia.
+#
+# Roda em Linux de proposito: a geração do .pptx não depende do PowerPoint.
+# As etapas que dependem, exportar slides em imagem e ativar video pela
+# automacao, ficam de fora e continuam sendo feitas na maquina de quem produz.
+
+name: testes
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  kit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements-dev.txt
+
+      - name: Conferir as regras de escrita do repositório
+        run: python scripts/verificar_texto.py
+
+      - name: Rodar a suite do kit
+        run: python -m pytest testes -q
+
+      - name: Gerar o catalogo de composições
+        run: |
+          python decks/demonstracao/gera_ativos.py
+          python decks/demonstracao/build.py
+
+      - name: Validar o catalogo
+        run: python scripts/validar_deck.py saida/demonstracao.pptx
+
+      - name: Gerar e validar o deck de exemplo
+        run: |
+          python decks/exemplo/gera_ativos.py
+          python decks/exemplo/build.py
+          python scripts/validar_deck.py saida/exemplo.pptx
