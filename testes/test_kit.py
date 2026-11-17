@@ -863,3 +863,26 @@ def test_extrair_acha_titulo_desenhado_e_margem_do_conteudo(tmp_path):
     design = json.loads((tmp_path / "deck" / "assets" / "importado"
                          / "design.json").read_text(encoding="utf-8"))
     assert abs(design["margem_esquerda"] - 0.6) < 0.01
+
+
+def test_pontos_da_linha_do_tempo_ficam_na_frente_da_barra():
+    """A barra é criada depois dos pontos no IFES; mesmo assim fica atrás."""
+    from kit.layouts import linha_do_tempo as linha_do_tempo_escura
+    from kit.layouts_ifes import linha_do_tempo, novo
+    from kit.tema_ifes import nova_apresentacao_ifes
+
+    prs = nova_apresentacao_ifes()
+    s = novo(prs)
+    linha_do_tempo(s, [("2024", "Um", "a"), ("2025", "Dois", "b"),
+                       ("2026", "Três", "c")])
+    ordem = [sh.name for sh in s.shapes]
+    barra = ordem.index("barra_progresso")
+    pontos = [i for i, n in enumerate(ordem) if n.startswith("Oval")]
+    assert pontos and all(i > barra for i in pontos)
+
+    s = linha_do_tempo_escura(nova_apresentacao(), 2, "Título",
+                              [("2024", "a"), ("2025", "b"), ("2026", "c")])
+    ordem = [sh.name for sh in s.shapes]
+    barra = ordem.index("barra_progresso")
+    pontos = [i for i, n in enumerate(ordem) if n.startswith("Oval")]
+    assert pontos and all(i > barra for i in pontos)

@@ -87,16 +87,25 @@ def barra_de_progresso(slide, y, x_inicio, x_fim, nome="barra_progresso",
                        cor=TURQUESA, espessura=Pt(4.5)):
     """Barra que preenche uma linha do tempo, para animar com wipe(left).
 
-    Fica logo atras dos marcadores, para os pontos continuarem por cima.
+    Vai sempre para trás de toda forma que cruza a linha (os pontos dos
+    marcos), qualquer que seja a ordem em que elas foram criadas: no
+    PowerPoint, o que vem depois na árvore fica na frente, e marco escondido
+    atrás da barra é defeito visível. Uma régua longa na mesma altura, se
+    houver, continua atrás da barra.
     """
     barra = retangulo(slide, Inches(x_inicio), Inches(y),
                       Inches(x_fim - x_inicio), espessura, cor)
     barra.name = nome
+    topo, base = pol(barra.top), pol(barra.top + barra.height)
     for sh in slide.shapes:
-        if abs(pol(sh.top) - (y + 0.02)) < 0.06 and pol(sh.width) > 11:
+        if sh.shape_id == barra.shape_id or sh.top is None or not sh.height:
+            continue
+        cruza = pol(sh.top) <= base and pol(sh.top + sh.height) >= topo
+        regua = pol(sh.width) >= 0.9 * (x_fim - x_inicio)
+        if cruza and not regua:
             arvore = barra._element.getparent()
             arvore.remove(barra._element)
-            sh._element.addnext(barra._element)
+            sh._element.addprevious(barra._element)
             break
     return barra
 
