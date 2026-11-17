@@ -152,10 +152,6 @@ def retangulo(slide, x, y, cx, cy, cor, forma=MSO_SHAPE.RECTANGLE,
     return s
 
 
-def filete(slide, x, y, cor=TURQUESA, largura=Inches(0.9)):
-    return retangulo(slide, x, y, largura, Pt(4), cor)
-
-
 def kicker(slide, x, y, conteudo, cor=TURQUESA):
     return papel(texto(slide, x, y, Inches(6.0), Inches(0.3), conteudo, 11, cor,
                        negrito=True, espacamento=1.6, caixa_alta=True), "rotulo")

@@ -164,8 +164,7 @@ evitados por regra, e vários são cobrados por código.
 | Vício | O que o kit faz no lugar | Quem cobra |
 |---|---|---|
 | Travessão e meia-risca no texto, muitas vezes vários por slide | dois pontos, vírgula, parênteses ou ponto final | erro na geração, no validador e no `verificar_texto.py` |
-| Barra ou filete colorido sobre cada título | título sozinho, com rótulo em caixa alta quando precisa situar | nenhuma composição desenha barra sobre título |
-| Caixa tingida com faixa colorida na lateral, repetida em todo slide | régua fina e a frase de fecho, sem caixa | a composição `destaque` |
+| **Regra de ouro.** Barra vertical ao lado do texto, filete sobre título, faixa lateral em caixa, régua colorida acima de frase | o texto sozinho, com negrito, corpo e espaço fazendo a hierarquia | erro no validador: barra vertical fina em qualquer cor, horizontal colorida; só a barra da linha do tempo, que é conteúdo, passa |
 | Lista longa de marcadores | no máximo quatro por bloco; o resto vira outro slide | erro nas composições |
 | Título de efeito ("Revolucionando o futuro") | título que diz o fato do slide | revisão |
 | Emoji e ícone genérico como decoração | ícone só quando informa, número quando ordena | revisão |

@@ -65,7 +65,7 @@ TEXTO_DE_EXEMPLO = (
 # define a margem dos slides de conteúdo.
 PAPEIS_FORA_DA_MARGEM = ("numero", "rodape", "marca", "capa")
 
-MSO_GRUPO, MSO_MEDIA, MSO_PICTURE = 6, 16, 13
+MSO_GRUPO, MSO_MEDIA, MSO_PICTURE, MSO_AUTOFORMA = 6, 16, 13, 1
 
 # Sobreposicao entre duas caixas de texto. A medida util e a invasao vertical
 # em polegadas, e não a fracao de area: uma caixa de rotulo tem menos de tres
@@ -142,6 +142,31 @@ def cor_de_preenchimento(forma):
     except (AttributeError, TypeError, ValueError):
         pass
     return None
+
+
+def barra_colorida(forma, preenchimento):
+    """Forma fina e comprida com cor saturada: filete, faixa lateral, régua.
+
+    Regra de ouro do repositório: barra colorida não entra, nem sobre título,
+    nem ao lado de texto, nem acima de frase. A barra que preenche a linha do
+    tempo é conteúdo, não enfeite, e fica de fora pelo nome. Barra vertical
+    ao lado de texto reprova em qualquer cor; fio horizontal cinza (cabeçalho
+    de tabela, conector neutro) passa.
+    """
+    if (not preenchimento or forma.name == "barra_progresso"
+            or forma.shape_type not in (MSO_AUTOFORMA,)
+            or not forma.width or not forma.height):
+        return False
+    fina = min(forma.width, forma.height) < Inches(0.1)
+    comprida = max(forma.width, forma.height) > Inches(0.3)
+    if not (fina and comprida):
+        return False
+    # Barra vertical ao lado do texto é proibida em qualquer cor, até cinza.
+    if forma.height > forma.width:
+        return True
+    r, g, b = (int(preenchimento[i:i + 2], 16) for i in (0, 2, 4))
+    saturacao = (max(r, g, b) - min(r, g, b)) / max(1, max(r, g, b))
+    return saturacao > 0.2
 
 
 def papel_de(forma):
@@ -308,6 +333,7 @@ def analisa(caminho, detalhe=False, perfil_pedido=None):
 
         midias, fora, pequenos = [], 0, []
         fontes_ruins, cores_ruins, fundos_ruins = set(), set(), set()
+        barras = []
         exemplo = False
 
         for forma, em_grupo in percorrer(slide.shapes):
@@ -337,6 +363,8 @@ def analisa(caminho, detalhe=False, perfil_pedido=None):
             preenchimento = cor_de_preenchimento(forma)
             if preenchimento and preenchimento not in paleta:
                 fundos_ruins.add(preenchimento)
+            if barra_colorida(forma, preenchimento):
+                barras.append(forma.name)
 
             # Rotulo e legenda sao apoio, não leitura: para eles vale o piso
             # absoluto, e não o mínimo do perfil.
@@ -372,6 +400,9 @@ def analisa(caminho, detalhe=False, perfil_pedido=None):
                      % ", ".join(sorted(fontes_ruins)))
         if exemplo:
             rel.erro(indice, "texto de exemplo do modelo ainda no slide")
+        if barras:
+            rel.erro(indice, "%d barra(s) colorida(s) ou vertical(is) decorativa(s), proibidas "
+                     "no padrão: %s" % (len(barras), ", ".join(barras)))
         if fundos_ruins:
             rel.erro(indice, "preenchimento fora da paleta: %s"
                      % ", ".join("#" + c for c in sorted(fundos_ruins)))

@@ -42,13 +42,12 @@ def _quantidade(itens, minimo, maximo, nome):
                          % (nome, minimo, maximo))
 
 
-def _fecho(slide, y, frase, cor_regua=VERDE_ESCURO, cor_texto=TURQUESA,
-           largura_regua=Inches(4.6), largura=Inches(6.4), tamanho=12):
-    """Régua fina e a frase que o slide quer deixar."""
-    regua = retangulo(slide, MARGEM, Inches(y), largura_regua, Pt(2), cor_regua)
+def _fecho(slide, y, frase, cor_texto=TURQUESA, largura=Inches(6.4),
+           tamanho=12):
+    """A frase que o slide quer deixar, em negrito. Sem barra: regra de ouro."""
     frase = texto(slide, MARGEM, Inches(y + 0.2), largura, Inches(0.5), frase,
                   tamanho, cor_texto, negrito=True, entrelinha=1.3)
-    return [regua, frase]
+    return [frase]
 
 
 # ------------------------------------------------------------------- 1. capa
@@ -189,8 +188,8 @@ def comparacao(prs, indice, titulo_slide, esquerda, direita, apoio=None,
     retangulo(s, Inches(6.35), Inches(2.75), Inches(0.65), Inches(2.75), BRANCO)
 
     if fecho:
-        grupos.append((atraso, _fecho(s, 5.85, fecho, cor_regua=CINZA_CLARO,
-                                      cor_texto=PRETO, largura_regua=Inches(11.55),
+        grupos.append((atraso, _fecho(s, 5.85, fecho,
+                                      cor_texto=PRETO,
                                       largura=Inches(11.5), tamanho=13.5)))
     anima(s, grupos)
     return s
@@ -258,8 +257,7 @@ def faixa_de_etapas(prs, indice, titulo_slide, etapas, apoio=None, fecho=None,
         formas = [caixa, num, rotulo, detalhe]
         if j < quantidade - 1 and not escada:
             formas.append(retangulo(s, Inches(x + largura), Inches(y + 0.85),
-                                    Inches(folga), Pt(1.5),
-                                    TURQUESA if forte else CINZA_CLARO))
+                                    Inches(folga), Pt(1.5), CINZA_CLARO))
         grupos.append((atraso, formas))
         atraso += 250
 
@@ -278,9 +276,7 @@ def faixa_de_etapas(prs, indice, titulo_slide, etapas, apoio=None, fecho=None,
     if fecho:
         grupos.append((atraso, _fecho(s, base_y + 0.15 if escada else y + 2.1,
                                       fecho,
-                                      cor_regua=CINZA_CLARO if claro else VERDE_ESCURO,
                                       cor_texto=PRETO if claro else TURQUESA,
-                                      largura_regua=Inches(11.55),
                                       largura=Inches(11.5), tamanho=13)))
     # A escada constroi os degraus de baixo para cima; o fluxo entra em fade.
     anima(s, grupos, tipo=WIPE_CIMA if escada else FADE)

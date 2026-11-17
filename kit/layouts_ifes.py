@@ -320,36 +320,35 @@ def chevron(slide, x, y, largura=0.16, altura=0.24):
                  ajuste=0.5)
 
 
-def destaque(slide, y, conteudo, nivel=2):
-    """Frase de fecho do slide: uma régua fina e a frase, sem caixa.
+def destaque(slide, y, conteudo):
+    """Frase de fecho do slide, em negrito, sozinha: sem caixa e sem barra.
 
     É a frase que a pessoa leva, mesmo que esqueça o resto. Uma frase só: duas
     frases aqui significam que o slide tem dois assuntos.
 
-    O modelo do programa traz esse fecho dentro de um bloco tingido com uma
-    barra colorida encostada na borda esquerda. Aqui ele sai sem a caixa, com
-    uma régua fina em cima e a frase embaixo. Caixa tingida com barra lateral é
-    um componente de interface: repetida slide após slide, ela vira moldura
-    genérica e passa a decorar em vez de enfatizar. A régua é recurso de texto,
-    e continua funcionando na décima repetição.
+    Regra de ouro do repositório: nenhuma barra colorida. O modelo original
+    traz esse fecho num bloco tingido com barra na borda esquerda; aqui o
+    negrito e o espaço em volta bastam. O validador reprova barra colorida.
 
-    Devolve (régua, frase), e `altura` diz quanto o conjunto ocupou.
+    Devolve uma tupla com a frase, para entrar na coreografia com
+    `list(destaque(...))`.
     """
-    cores = {1: T.VERDE_1, 2: T.VERDE_2, 3: T.VERDE_3, 4: T.VERDE_4}
-    regua = forma(slide, T.MARGEM, y, T.UTIL, Pt(1.25), cores[nivel])
     frase = texto(slide, T.MARGEM, y + 0.15, T.UTIL, 0.40, conteudo,
                   T.CORPO["destaque"], T.TEXTO, negrito=True, entrelinha=1.18)
-    return regua, frase
+    return (frase,)
 
 
 def altura_do_destaque(conteudo):
-    """Quanto o fecho ocupa, da régua ao fim da frase. Para quem empilha."""
+    """Quanto o fecho ocupa, do y pedido ao fim da frase. Para quem empilha."""
     return 0.15 + altura_medida(conteudo, T.UTIL, T.CORPO["destaque"], True,
                                 1.18)
 
 
 def linha(slide, x, y, largura, cor_da_linha=None, espessura=1.0):
-    """Régua fina horizontal, como a que separa cabeçalho de tabela."""
+    """Fio neutro horizontal, como o que separa cabeçalho de tabela.
+
+    Sempre em cinza claro: barra colorida não entra no padrão.
+    """
     regua = forma(slide, x, y, largura, Pt(espessura),
                   cor_da_linha or T.LINHA_FINA)
     return regua

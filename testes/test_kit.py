@@ -663,17 +663,16 @@ def test_composicoes_ifes_geram_e_ficam_na_area_util():
 
 
 def test_fecho_sai_sem_caixa_e_a_altura_acompanha_a_frase():
-    """O fecho é régua mais frase. Caixa tingida com barra lateral saiu."""
+    """O fecho é só a frase: sem caixa e sem barra colorida."""
     from kit.layouts_ifes import altura_do_destaque, destaque, novo, pol
     from kit.tema_ifes import nova_apresentacao_ifes
 
     prs = nova_apresentacao_ifes()
     s = novo(prs)
     formas_antes = len(s.shapes._spTree)
-    regua, frase = destaque(s, 1.5, "Uma frase.")
-    assert len(s.shapes._spTree) - formas_antes == 2   # régua e frase, só
-    assert pol(regua.height) < 0.03                    # é régua, não bloco
-    assert regua.fill.type == 1
+    (frase,) = destaque(s, 1.5, "Uma frase.")
+    assert len(s.shapes._spTree) - formas_antes == 1   # só a frase
+    assert frase.has_text_frame
 
     longa = ("Uma frase bem mais comprida, que ocupa duas linhas inteiras na "
              "largura útil do slide e ainda continua por mais um pouco.")
@@ -886,3 +885,22 @@ def test_pontos_da_linha_do_tempo_ficam_na_frente_da_barra():
     barra = ordem.index("barra_progresso")
     pontos = [i for i, n in enumerate(ordem) if n.startswith("Oval")]
     assert pontos and all(i > barra for i in pontos)
+
+
+def test_validador_reprova_barra_colorida(tmp_path):
+    """Regra de ouro: filete, faixa lateral ou régua colorida reprovam."""
+    from kit.layouts_ifes import cabecalho, forma, novo
+    from kit.tema_ifes import VERDE_2, nova_apresentacao_ifes
+
+    prs = nova_apresentacao_ifes()
+    s = novo(prs)
+    cabecalho(s, "Título do slide", "Uma linha de contexto.")
+    forma(s, 2.05, 6.0, 0.04, 0.5, VERDE_2)      # barrinha ao lado de texto
+    forma(s, 2.05, 5.0, 0.04, 0.5, "D3DCD7")     # vertical cinza: também não
+    forma(s, 2.05, 4.0, 3.0, 0.01, "D3DCD7")     # fio horizontal cinza: pode
+    aplicar_em_todos(prs)
+    arquivo = tmp_path / "barra.pptx"
+    prs.save(str(arquivo))
+    codigo, saida = _validar(arquivo)
+    assert codigo == 2
+    assert "2 barra(s) colorida(s) ou vertical(is)" in saida

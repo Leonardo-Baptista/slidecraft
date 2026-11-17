@@ -224,8 +224,12 @@ imagem, GIF, vídeo, Morph). Só gere depois que a pessoa aprovar.
   nem meia-risca (use dois pontos, vírgula ou parênteses), nem no slide, nem
   nas notas, nem na sua resposta à pessoa. O kit recusa travessão no texto do
   slide.
-- **Sem cara de slide feito por IA.** Não desenhe barra ou filete sobre
-  título, nem caixa tingida com faixa colorida na lateral. Título diz o fato,
+- **Regra de ouro: nenhuma barra.** Nada de barra vertical ao lado do texto,
+  antes de ele começar, em cor nenhuma; nada de filete sobre título, faixa
+  lateral em caixa ou régua colorida acima de frase. Hierarquia se faz com
+  negrito, corpo e espaço. O validador reprova. A única barra permitida é a
+  que preenche a linha do tempo.
+- **Sem cara de slide feito por IA.** Título diz o fato,
   sem frase de efeito. Nada de emoji decorativo nem ícone genérico. Nada de
   animação que voa ou gira. Se o slide pudesse estar em qualquer
   apresentação, reescreva. A lista completa está em
