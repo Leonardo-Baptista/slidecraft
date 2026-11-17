@@ -66,7 +66,7 @@ Na dúvida, use `ifes`. As seções 1 a 6 abaixo descrevem a identidade
 | Papel | Cor | Onde aparece |
 |---|---|---|
 | Fundo dominante | `#000000` | slides de foto, case, provocação e encerramento |
-| Acento principal | `#00E5C0` turquesa | filete, kicker, ponto de marcador, frase de fecho |
+| Acento principal | `#00E5C0` turquesa | kicker, ponto de marcador, frase de fecho |
 | Verde escuro | `#00846F` | blocos cheios, mapas, coluna de destaque |
 | Verde claro | `#54C1AF` e `#B8E8DF` | texto dentro de bloco verde escuro |
 | Texto secundário | `#575756` e `#9D9D9C` | apoio, legenda, número de página |
@@ -154,11 +154,35 @@ composição nova.
 
 ---
 
+## 4c. Sem cara de slide feito por IA
+
+O kit existe para estruturar e modernizar apresentações sem deixar a marca
+evidente de material gerado por IA. Alguns vícios se repetem tanto nesse tipo
+de material que denunciam a origem antes de qualquer leitura. Aqui eles são
+evitados por regra, e vários são cobrados por código.
+
+| Vício | O que o kit faz no lugar | Quem cobra |
+|---|---|---|
+| Travessão e meia-risca no texto, muitas vezes vários por slide | dois pontos, vírgula, parênteses ou ponto final | erro na geração, no validador e no `verificar_texto.py` |
+| Barra ou filete colorido sobre cada título | título sozinho, com rótulo em caixa alta quando precisa situar | nenhuma composição desenha barra sobre título |
+| Caixa tingida com faixa colorida na lateral, repetida em todo slide | régua fina e a frase de fecho, sem caixa | a composição `destaque` |
+| Lista longa de marcadores | no máximo quatro por bloco; o resto vira outro slide | erro nas composições |
+| Título de efeito ("Revolucionando o futuro") | título que diz o fato do slide | revisão |
+| Emoji e ícone genérico como decoração | ícone só quando informa, número quando ordena | revisão |
+| Animação em tudo, voando e girando | só `fade` e `wipe`, de entrada, onde há ordem | só esses dois efeitos existem no kit |
+| Número sem fonte | linha de fonte no rodapé de todo slide com dado | revisão |
+| Texto sem acento ou em português de Portugal | português do Brasil, acentuação conferida | aviso no `verificar_texto.py` |
+
+O teste prático: se o slide pudesse estar em qualquer apresentação sobre
+qualquer assunto, ele é genérico demais. Cada slide precisa dizer uma coisa
+que só aquela apresentação diz.
+
+---
+
 ## 5. Elementos recorrentes
 
 ```
 ┌──────────────────────────────────────────────────────┐
-│  ▬▬▬  filete turquesa                                │
 │  KICKER EM CAIXA ALTA                                │
 │                                                       │
 │  Título direto,                                       │
@@ -174,7 +198,6 @@ composição nova.
 └──────────────────────────────────────────────────────┘
 ```
 
-- **Filete turquesa** acima do título, como marcador de abertura.
 - **Kicker** em caixa alta antes do título, dizendo de que bloco o slide faz
   parte. Ajuda quem chegou atrasado a se localizar.
 - **Linha de apoio** abaixo do título, uma frase, nunca duas.

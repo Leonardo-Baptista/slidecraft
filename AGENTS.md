@@ -221,8 +221,15 @@ imagem, GIF, vídeo, Morph). Só gere depois que a pessoa aprovar.
 - **No máximo quatro itens** por lista ou bloco. Mais que isso, divida em dois
   slides.
 - **Escrita**: português do Brasil com acentuação correta, e nenhum travessão
-  nem meia-risca (use dois pontos, vírgula ou parênteses). O kit recusa
-  travessão no texto do slide.
+  nem meia-risca (use dois pontos, vírgula ou parênteses), nem no slide, nem
+  nas notas, nem na sua resposta à pessoa. O kit recusa travessão no texto do
+  slide.
+- **Sem cara de slide feito por IA.** Não desenhe barra ou filete sobre
+  título, nem caixa tingida com faixa colorida na lateral. Título diz o fato,
+  sem frase de efeito. Nada de emoji decorativo nem ícone genérico. Nada de
+  animação que voa ou gira. Se o slide pudesse estar em qualquer
+  apresentação, reescreva. A lista completa está em
+  `docs/padrao-visual.md`, seção 4c.
 - **Imagens e vídeos no lugar certo**: tudo em `decks/nome_do_deck/assets/`;
   o resultado sai em `saida/`. Nada disso vai para o Git.
 - **Design importado é respeitado**: com a identidade `importada`, use só as

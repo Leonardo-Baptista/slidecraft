@@ -18,6 +18,11 @@ O padrão não fica na cabeça de quem diagrama: fica em código. Paleta,
 tipografia, posição de cada bloco, animação de entrada e transição já estão
 resolvidas no kit, e um validador confere tudo antes da entrega.
 
+A ideia é dar a uma apresentação, nova ou já existente, uma estrutura melhor
+e uma roupagem moderna (transições, entradas animadas, números que sobem,
+linha do tempo que se desenha, GIFs e vídeos) **sem a cara evidente de slide
+feito por IA**.
+
 ![Deck de exemplo: dez slides no modelo IFES](docs/img/exemplo.jpg)
 
 *O deck de exemplo, num tema fictício: capa, linha do tempo, números que
@@ -28,18 +33,19 @@ sobem, fluxo em cartões, imagem, GIF, vídeo, Morph e encerramento.*
 ## Sumário
 
 1. [O que o kit entrega](#o-que-o-kit-entrega)
-2. [Começo rápido](#começo-rápido)
-3. [Os dois caminhos](#os-dois-caminhos)
-4. [Criar do zero](#criar-do-zero)
-5. [Reformular uma apresentação existente](#reformular-uma-apresentação-existente)
-6. [Identidades visuais](#identidades-visuais)
-7. [Como o movimento funciona](#como-o-movimento-funciona)
-8. [Onde fica cada coisa](#onde-fica-cada-coisa)
-9. [Sem agente, na mão](#sem-agente-na-mão)
-10. [Validação](#validação)
-11. [Requisitos](#requisitos)
-12. [Como contribuir](#como-contribuir)
-13. [Autor e licença](#autor-e-licença)
+2. [Sem cara de slide feito por IA](#sem-cara-de-slide-feito-por-ia)
+3. [Começo rápido](#começo-rápido)
+4. [Os dois caminhos](#os-dois-caminhos)
+5. [Criar do zero](#criar-do-zero)
+6. [Reformular uma apresentação existente](#reformular-uma-apresentação-existente)
+7. [Identidades visuais](#identidades-visuais)
+8. [Como o movimento funciona](#como-o-movimento-funciona)
+9. [Onde fica cada coisa](#onde-fica-cada-coisa)
+10. [Sem agente, na mão](#sem-agente-na-mão)
+11. [Validação](#validação)
+12. [Requisitos](#requisitos)
+13. [Como contribuir](#como-contribuir)
+14. [Autor e licença](#autor-e-licença)
 
 ---
 
@@ -59,6 +65,28 @@ sobem, fluxo em cartões, imagem, GIF, vídeo, Morph e encerramento.*
 | **Reformulação** | uma apresentação existente ganha estrutura e movimento, mantendo ou trocando o design |
 | **Validação** | paleta, fonte, margem, colisão de texto, corpo mínimo e transição, conferidos por script |
 | **Escrita** | português do Brasil, acentuação conferida, nenhum travessão |
+
+---
+
+## Sem cara de slide feito por IA
+
+Material gerado por IA costuma se denunciar pelos mesmos vícios. Este
+repositório evita cada um deles, e vários são cobrados por código, não por
+boa vontade:
+
+| Vício comum | O que acontece aqui |
+|---|---|
+| **Travessão** (e o uso excessivo dele, vários por slide) | proibido em slide, notas, código e documentação; a geração recusa e o validador acusa |
+| **Barra ou filete sobre o título** | nenhuma composição desenha; o título fica sozinho |
+| **Caixa tingida com faixa lateral colorida** em todo slide | substituída por uma régua fina e a frase de fecho |
+| **Lista longa de marcadores** | no máximo quatro; o resto vira outro slide |
+| **Título de efeito** | o título diz o fato do slide |
+| **Emoji e ícone genérico** decorando | fora; ícone só quando informa |
+| **Animação que voa e gira** | só `fade` e `wipe`, de entrada, onde há ordem |
+| **Número sem procedência** | linha de fonte em todo slide com dado |
+
+A lista completa, com o motivo de cada regra, está em
+[docs/padrao-visual.md](docs/padrao-visual.md#4c-sem-cara-de-slide-feito-por-ia).
 
 ---
 
