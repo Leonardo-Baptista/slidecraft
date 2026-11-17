@@ -46,7 +46,10 @@ def main():
             print(r.stdout + r.stderr)
             return 1
     (pasta / "assets").mkdir(exist_ok=True)
-    shutil.copyfile(origem, pasta / "assets" / "original.pptx")
+    destino = pasta / "assets" / "original.pptx"
+    # Reimportar o próprio original.pptx não pode tentar copiar sobre si mesmo.
+    if not destino.exists() or not destino.samefile(origem):
+        shutil.copyfile(origem, destino)
     conteudo = extrair(origem, pasta)
     dados = json.loads(conteudo.read_text(encoding="utf-8"))
     design = json.loads((conteudo.parent / "design.json")
