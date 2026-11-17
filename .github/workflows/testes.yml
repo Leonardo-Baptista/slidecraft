@@ -50,3 +50,10 @@ jobs:
           python decks/exemplo/gera_ativos.py
           python decks/exemplo/build.py
           python scripts/validar_deck.py saida/exemplo.pptx
+
+      - name: Reformular a apresentação de exemplo mantendo o design
+        run: |
+          python decks/exemplo_importado/gera_ativos.py
+          python scripts/importar_pptx.py decks/exemplo_importado/assets/original.pptx exemplo_importado
+          python decks/exemplo_importado/build.py
+          python scripts/validar_deck.py saida/exemplo_importado.pptx

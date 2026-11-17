@@ -29,8 +29,6 @@ AQUI = Path(__file__).resolve().parent
 RAIZ = AQUI.parent.parent
 sys.path.insert(0, str(RAIZ))
 
-from pptx.dml.color import RGBColor  # noqa: E402
-from pptx.enum.shapes import MSO_SHAPE  # noqa: E402
 from pptx.enum.text import PP_ALIGN  # noqa: E402
 from pptx.util import Inches  # noqa: E402
 
@@ -41,17 +39,15 @@ base.CACHE = AQUI / "cache"
 base.CACHE.mkdir(exist_ok=True)
 
 from kit import tema_ifes as T  # noqa: E402
-from kit.animacao import DURACAO_BARRA, monta_timing  # noqa: E402
-from kit.coreografia import (FADE, WIPE_ESQUERDA,  # noqa: E402
-                             barra_de_progresso, efeitos_de_formas,
-                             marcos_na_passagem)
+from kit.animacao import monta_timing  # noqa: E402
+from kit.coreografia import FADE, efeitos_de_formas  # noqa: E402
 from kit.clipes import ultimo_quadro  # noqa: E402
 from kit.editorial import notas  # noqa: E402
-from kit.layouts_ifes import (cabecalho, capa, cartao, chevron,  # noqa: E402
-                              chip, corpo, destaque, fonte, forma, imagem,
-                              novo, numero, rotulo, texto)
-from kit.numeros import (inteiro, numero_que_sobe,  # noqa: E402
-                         porcentagem, tocar_junto)
+from kit.layouts_ifes import (cabecalho, capa, cartao,  # noqa: E402
+                              cartoes_de_numeros, chevron, chip, corpo,
+                              destaque, fonte, imagem, linha_do_tempo, novo,
+                              numero, texto)
+from kit.numeros import inteiro, porcentagem, tocar_junto  # noqa: E402
 from kit.slides import anima, inserir_video  # noqa: E402
 from kit.tema_ifes import nova_apresentacao_ifes  # noqa: E402
 from kit.transicoes import aplicar_em_todos  # noqa: E402
@@ -88,33 +84,11 @@ def s02_linha_do_tempo(prs):
               ("Mar", "Primeiros canteiros", "Seis canteiros e um mutirão."),
               ("Jun", "Irrigação", "Cisterna e gotejamento."),
               ("Out", "Primeira feira", "Excedente vendido na praça."))
-    largura, passo, y_barra = 2.40, 2.70, 3.02
-    grupos, centros = [], []
-    for i, (mes, nome, descricao) in enumerate(marcos):
-        x = T.MARGEM + i * passo
-        centro = x + largura / 2
-        centros.append(centro)
-        grupos.append([
-            chip(s, x, 1.86, 0.80, 0.30, mes, T.VERDE_1 if i < 3 else T.VERDE_2),
-            texto(s, x, 2.26, largura, 0.30, nome, 13.5, T.VERDE_1,
-                  negrito=True),
-            forma(s, centro - 0.10, y_barra - 0.08, 0.20, 0.20, T.VERDE_1,
-                  tipo=MSO_SHAPE.OVAL),
-            texto(s, x, 3.34, largura, 0.80, descricao, T.CORPO["texto"],
-                  T.TEXTO, entrelinha=1.2)])
-    barra = barra_de_progresso(s, y_barra, T.MARGEM, T.MARGEM + T.UTIL,
-                               cor=RGBColor.from_string(T.VERDE_2))
     faixa = destaque(s, 5.9, "Em dez meses, um terreno vazio virou feira.")
     fonte(s, FICTICIO)
-
-    atrasos = marcos_na_passagem(barra, centros, DURACAO_BARRA)
-    animacao = efeitos([(0, [t]), (240, [sub])])
-    animacao += efeitos([(520, [barra])], tipo=WIPE_ESQUERDA,
-                        duracao=DURACAO_BARRA)
-    animacao += efeitos([(520 + a, g) for a, g in zip(atrasos, grupos)],
-                        duracao=380)
-    animacao += efeitos([(3000, list(faixa))])
-    monta_timing(s, animacao)
+    monta_timing(s, efeitos([(0, [t]), (240, [sub])])
+                 + linha_do_tempo(s, marcos)
+                 + efeitos([(3000, list(faixa))]))
     notas(s, "Linha do tempo: a barra preenche e cada marco entra quando ela "
              "passa por ele. Deixe a animação correr, são uns três segundos.")
 
@@ -124,24 +98,11 @@ def s03_numeros(prs):
     s = novo(prs)
     t, sub = cabecalho(s, "Um ano em três números",
                        "O que a horta entregou de janeiro a dezembro.")
-    blocos = (("Colhido", 1250, inteiro, "quilos de alimento"),
-              ("Famílias", 86, inteiro, "atendidas toda semana"),
-              ("Aproveitamento", 94, porcentagem(), "da colheita consumida"))
-    grupos, filmes = [], []
-    for i, (nome, valor, formatar, legenda) in enumerate(blocos):
-        x = T.MARGEM + i * (T.COLUNA_3 + T.FOLGA)
-        nivel = i + 1
-        fundo_cartao = T.CARTOES[nivel - 1][0]
-        c = cartao(s, x, 1.95, T.COLUNA_3, 2.45, nivel)
-        r = rotulo(s, x + 0.25, 2.18, nome)
-        n = numero_que_sobe(s, VIDEO / ("numero_%d.mp4" % i), x + 0.25, 2.55,
-                            T.COLUNA_3 - 0.5, 0.95, ate=valor,
-                            formatar=formatar, corpo=48, cor=T.VERDE_2,
-                            fundo=fundo_cartao)
-        l = corpo(s, x + 0.25, 3.62, T.COLUNA_3 - 0.5, 0.5, legenda)
-        atraso = 500 + i * 350
-        grupos.append((atraso, [c, r, n, l]))
-        filmes.append((n, atraso))
+    grupos, filmes = cartoes_de_numeros(
+        s, [("Colhido", 1250, inteiro, "quilos de alimento"),
+            ("Famílias", 86, inteiro, "atendidas toda semana"),
+            ("Aproveitamento", 94, porcentagem(), "da colheita consumida")],
+        VIDEO)
     faixa = destaque(s, 5.0, "Mais de uma tonelada de comida, a duas quadras "
                              "de casa.")
     fonte(s, FICTICIO)
