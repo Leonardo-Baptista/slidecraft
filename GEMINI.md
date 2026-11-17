@@ -1,0 +1,5 @@
+# Instruções para o agente
+
+Siga o roteiro completo em [AGENTS.md](AGENTS.md): preparar o ambiente
+virtual, entrevistar a pessoa antes de criar, gerar, validar e conferir os
+slides.
