@@ -39,7 +39,13 @@ palestra com foto em tela cheia.
 | Margem | 0,9 dos dois lados | 2,05 à esquerda, 0,78 à direita |
 | Como abrir | `nova_apresentacao()` | `nova_apresentacao_ifes()` |
 
-O que **não** muda entre as duas: formato 16:9, as regras de escrita, o
+Há uma terceira, `importada`, para reformular uma apresentação que a pessoa
+já tem mantendo o design dela (`kit/importado.py`). Nela, o modelo é o
+próprio arquivo de origem: mestre, layouts, fundos e logotipo continuam, e o
+validador cobra a paleta e as fontes do tema dele e as margens dos layouts
+dele, e não as do kit. O formato também pode continuar o original.
+
+O que **não** muda entre as identidades: formato 16:9, as regras de escrita, o
 vocabulário de animação, a transição em fade, a medição de texto antes de
 desenhar e a exigência de procedência. `kit/animacao.py`, `kit/coreografia.py`
 e `kit/transicoes.py` não sabem de cor nenhuma e servem às duas sem alteração.

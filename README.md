@@ -31,7 +31,27 @@ resolvidas no kit.
 | Escrita | português do Brasil, acentuação conferida, nenhum travessão |
 
 O modelo padrão é o **modelo de apresentação do IFES**, público. Há também a
-identidade `escuro` (fundo preto, acento turquesa, foto em tela cheia).
+identidade `escuro` (fundo preto, acento turquesa, Montserrat, foto em tela
+cheia) e a `importada`, que mantém o design de uma apresentação que você já
+tem.
+
+---
+
+## Reformular uma apresentação que você já tem
+
+Anexe ou indique o seu `.pptx` e peça:
+
+> Reformule a apresentação `minha_aula.pptx` no padrão deste repositório.
+
+O agente extrai texto, imagens, vídeos, tabelas, gráficos e notas, e pergunta
+primeiro se você quer **manter o seu design** (fundo, logotipo, cores e
+fontes) ou **passar para o modelo IFES** ou para o escuro. Depois mostra um
+roteiro de-para (de qual slide original vem cada slide novo) e só gera com a
+sua aprovação. Nos dois casos, o resultado ganha transição em todos os
+slides, entrada animada, números que sobem e linha do tempo que se desenha.
+
+O deck `decks/exemplo_importado` mostra isso: uma apresentação simples, com
+listas longas, reformulada sem perder o visual dela.
 
 ---
 
@@ -95,6 +115,7 @@ slidecraft/
 │   ├── layouts_ifes.py      cabeçalho, cartão, chip, destaque, fonte, imagem
 │   ├── layouts.py           sete composições prontas da identidade escuro
 │   ├── numeros.py           número que sobe de zero até o valor
+│   ├── importado.py         extrai um .pptx e reaproveita o design dele
 │   ├── animacao.py          animação de entrada, escrita no XML
 │   ├── transicoes.py        fade por preto e Morph
 │   ├── slides.py            vídeo com início automático e loop
@@ -102,9 +123,11 @@ slidecraft/
 ├── decks/
 │   ├── _modelo/             ponto de partida de todo deck novo (IFES)
 │   ├── exemplo/             um slide de cada recurso, tema fictício
+│   ├── exemplo_importado/   apresentação simples reformulada, design mantido
 │   └── demonstracao/        catálogo da identidade escuro
 ├── scripts/
 │   ├── novo_deck.py         cria decks/<nome> a partir do modelo
+│   ├── importar_pptx.py     prepara a reformulação de um .pptx existente
 │   ├── produzir.py          gera, valida e exporta a folha de contato
 │   ├── validar_deck.py      confere se o .pptx está no padrão
 │   └── exportar_slides.py   slides em PNG (Windows com PowerPoint)
@@ -143,8 +166,11 @@ python scripts/produzir.py minha_palestra
 
 - Python 3.10 ou mais novo. O ffmpeg vem dentro do ambiente virtual, pelo
   pacote `imageio-ffmpeg`; não precisa instalar.
-- PowerPoint (Windows ou macOS) para apresentar. Morph pede PowerPoint 2019 ou
-  365; nas versões antigas, vira fade.
+- **PowerPoint** (Windows ou macOS) para apresentar. Morph pede PowerPoint
+  2019 ou 365; nas versões antigas, vira fade. LibreOffice, Keynote e Google
+  Slides abrem o arquivo, mas perdem parte das animações e dos vídeos.
+- Para a identidade `escuro`, a fonte **Montserrat** instalada (gratuita, no
+  Google Fonts). O modelo IFES usa Arial, que já vem no sistema.
 - A exportação dos slides em imagem para conferência usa a automação do
   PowerPoint e só roda no Windows. Nos outros sistemas, o resto funciona e a
   conferência visual é abrindo o arquivo.
