@@ -833,3 +833,33 @@ def test_linha_do_tempo_ifes_usa_wipe_e_fica_na_area_util(tmp_path):
     assert codigo == 0, saida
     with pytest.raises(ValueError):
         linha_do_tempo(novo(prs), [("1", "só um", "")])
+
+
+def test_extrair_acha_titulo_desenhado_e_margem_do_conteudo(tmp_path):
+    """Apresentação desenhada à mão: título em caixa comum, layout 4:3 num
+    slide 16:9. O título e a margem saem do conteúdo, não do layout."""
+    import json
+    from pptx import Presentation
+    from kit.importado import extrair
+
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
+    s = prs.slides.add_slide(prs.slide_layouts[6])
+    rotulo = s.shapes.add_textbox(Inches(0.6), Inches(0.3), Inches(4), Inches(0.3))
+    rotulo.text_frame.text = "SEÇÃO"
+    rotulo.text_frame.paragraphs[0].runs[0].font.size = Pt(10)
+    tit = s.shapes.add_textbox(Inches(0.6), Inches(0.7), Inches(12), Inches(0.6))
+    tit.text_frame.text = "Título desenhado"
+    tit.text_frame.paragraphs[0].runs[0].font.size = Pt(24)
+    num = s.shapes.add_textbox(Inches(0.6), Inches(3.0), Inches(4), Inches(1))
+    num.text_frame.text = "95%"
+    num.text_frame.paragraphs[0].runs[0].font.size = Pt(40)
+    origem = tmp_path / "desenhada.pptx"
+    prs.save(str(origem))
+
+    conteudo = json.loads(extrair(origem, tmp_path / "deck")
+                          .read_text(encoding="utf-8"))
+    assert conteudo["slides"][0]["titulo"] == "Título desenhado"
+    design = json.loads((tmp_path / "deck" / "assets" / "importado"
+                         / "design.json").read_text(encoding="utf-8"))
+    assert abs(design["margem_esquerda"] - 0.6) < 0.01

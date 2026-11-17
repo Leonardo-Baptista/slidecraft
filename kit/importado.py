@@ -73,6 +73,15 @@ def design(prs):
         return no.get("typeface") if no is not None else None
 
     largura, altura = _pol(prs.slide_width), _pol(prs.slide_height)
+    # Medida no conteúdo dos slides quando houver: muita apresentação é
+    # desenhada à mão sobre layouts que nunca foram ajustados ao formato.
+    meta = metadados(prs)
+    importado = "paleta" in meta
+    # Num deck já montado por `abrir_modelo`, paleta e margens são as do
+    # original, gravadas nos metadados, e não as dos slides novos.
+    margens_slides = (
+        (float(meta["margem_e"]), float(meta["margem_d"])) if importado
+        else _margens_do_conteudo(prs, largura))
     esquerdas, direitas = [], []
     layouts = []
     for layout in prs.slide_layouts:
@@ -90,10 +99,77 @@ def design(prs):
         "largura": largura, "altura": altura,
         "cores": cores,
         "fontes": {"titulo": familia("majorFont"), "corpo": familia("minorFont")},
-        "margem_esquerda": min(esquerdas) if esquerdas else 0.5,
-        "margem_direita": min(direitas) if direitas else 0.5,
+        "margem_esquerda": margens_slides[0] if margens_slides else (
+            min(esquerdas) if esquerdas else 0.5),
+        "margem_direita": margens_slides[1] if margens_slides else (
+            min(direitas) if direitas else 0.5),
         "layouts": layouts,
+        # O design de muita apresentação é desenhado slide a slide, e não no
+        # tema: a paleta de verdade é a que os slides usam.
+        "cores_usadas": ([c for c in meta["paleta"].split(",") if c]
+                         if importado else _cores_usadas(prs)),
+        "fundos": [_fundo(s) for s in prs.slides],
     }
+
+
+def _margens_do_conteudo(prs, largura):
+    """Menor recuo de texto à esquerda e à direita, nos slides existentes."""
+    esquerdas, direitas = [], []
+    for slide in prs.slides:
+        for forma in slide.shapes:
+            if (not forma.has_text_frame or not forma.text_frame.text.strip()
+                    or forma.left is None or not forma.width):
+                continue
+            e = _pol(forma.left)
+            d = largura - _pol(forma.left + forma.width)
+            # Encostado na borda é faixa ou rodapé sangrado, não margem.
+            if e > 0.1:
+                esquerdas.append(e)
+            if d > 0.1:
+                direitas.append(d)
+    if not esquerdas or not direitas:
+        return None
+    # Percentil baixo, e não o mínimo: um selo isolado perto da borda não
+    # pode virar a margem do deck inteiro.
+    esquerdas.sort()
+    direitas.sort()
+    return (round(esquerdas[len(esquerdas) // 10], 3),
+            round(direitas[len(direitas) // 10], 3))
+
+
+def _fundo(slide):
+    """Cor sólida do fundo do slide, ou None quando herda do layout."""
+    try:
+        if slide.background.fill.type == 1:
+            return str(slide.background.fill.fore_color.rgb).upper()
+    except (AttributeError, TypeError, ValueError):
+        pass
+    return None
+
+
+def _cores_usadas(prs, limite=16):
+    """As cores mais usadas em preenchimento, texto e fundo dos slides."""
+    from collections import Counter
+    conta = Counter()
+    for slide in prs.slides:
+        if _fundo(slide):
+            conta[_fundo(slide)] += 3
+        for forma in _formas(slide.shapes):
+            try:
+                if forma.fill.type == 1:
+                    conta[str(forma.fill.fore_color.rgb).upper()] += 1
+            except (AttributeError, TypeError, ValueError, NotImplementedError):
+                pass
+            if not forma.has_text_frame:
+                continue
+            for p in forma.text_frame.paragraphs:
+                for r in p.runs:
+                    try:
+                        if r.font.color.rgb is not None:
+                            conta[str(r.font.color.rgb).upper()] += 1
+                    except (AttributeError, TypeError, ValueError):
+                        pass
+    return [c for c, _ in conta.most_common(limite)]
 
 
 def cor(prs, nome):
@@ -117,6 +193,21 @@ def _formas(formas):
             yield from _formas(forma.shapes)
         else:
             yield forma
+
+
+def _titulo_provavel(slide, altura, minimo=18):
+    """Título desenhado como caixa de texto comum: a caixa mais alta do slide
+    com fonte de título (18 pontos ou mais). Número grande de destaque costuma
+    ficar abaixo do título, e rótulo pequeno acima dele fica de fora."""
+    candidatos = []
+    for forma in _formas(slide.shapes):
+        if not forma.has_text_frame or forma.top is None:
+            continue
+        corpos = [r.font.size.pt for p in forma.text_frame.paragraphs
+                  for r in p.runs if r.font.size]
+        if corpos and max(corpos) >= minimo and forma.text_frame.text.strip():
+            candidatos.append((forma.top, forma.text_frame.text.strip()))
+    return min(candidatos)[1] if candidatos else None
 
 
 def extrair(origem, pasta_deck):
@@ -167,6 +258,9 @@ def extrair(origem, pasta_deck):
             if not destino.exists():
                 destino.write_bytes(parte.blob)
                 item["videos"].append("importado/" + destino.name)
+        if not item["titulo"]:
+            item["titulo"] = _titulo_provavel(slide, prs.slide_height)
+        item["fundo"] = _fundo(slide)
         if slide.has_notes_slide:
             item["notas"] = slide.notes_slide.notes_text_frame.text.strip()
         slides.append(item)
@@ -184,10 +278,14 @@ def extrair(origem, pasta_deck):
 def abrir_modelo(origem, perfil="ao_vivo", divulgacao="publico"):
     """Abre o .pptx da pessoa, apaga os slides e guarda o design dela.
 
-    Mestre, layouts, tema, fundos e logotipo continuam. As margens medidas
-    ficam nos metadados, para o validador cobrar a grade dela, e não a do kit.
+    Mestre, layouts, tema, fundos e logotipo continuam. As margens medidas e
+    as cores que os slides dela usavam ficam nos metadados, para o validador
+    cobrar a grade e a paleta dela, e não as do kit. Fundo desenhado slide a
+    slide (capa escura, por exemplo) não está no mestre: veja `fundos` em
+    `design.json` e repita com `kit.base.fundo(s, cor)`.
     """
     prs = Presentation(str(origem))
+    d = design(prs)          # antes de apagar: margens e cores dos slides
     lista = prs.slides._sldIdLst
     for sld in list(lista):
         prs.part.drop_rel(sld.rId)
@@ -196,10 +294,9 @@ def abrir_modelo(origem, perfil="ao_vivo", divulgacao="publico"):
     # maioria das fontes sem serifa; para fonte muito larga ou condensada, a
     # detecção de colisão perde precisão.
     medidas.usar_familia("arial")
-    d = design(prs)
     configurar(prs, perfil, divulgacao, identidade="importada")
-    prs.core_properties.keywords += ";margem_e=%.3f;margem_d=%.3f" % (
-        d["margem_esquerda"], d["margem_direita"])
+    prs.core_properties.keywords += ";margem_e=%.3f;margem_d=%.3f;paleta=%s" % (
+        d["margem_esquerda"], d["margem_direita"], ",".join(d["cores_usadas"]))
     return prs
 
 
@@ -259,8 +356,12 @@ def reservado(slide, indice, conteudo):
 
 def texto(slide, x, y, cx, cy, conteudo, tamanho, cor_do_texto="dk1",
           negrito=False, alinhamento=PP_ALIGN.LEFT, entrelinha=1.15,
-          titulo_do_tema=False):
-    """Caixa de texto na fonte do tema da pessoa. Posições em polegadas."""
+          titulo_do_tema=False, funcao=None):
+    """Caixa de texto na fonte do tema da pessoa. Posições em polegadas.
+
+    `funcao="rotulo"` ou `"legenda"` marca texto de apoio, que pode ser menor
+    que o corpo mínimo de leitura do perfil (vale o piso absoluto, 9,5).
+    """
     prs = slide.part.package.presentation_part.presentation
     d = design(prs)
     tb = slide.shapes.add_textbox(Inches(x), Inches(y), Inches(cx), Inches(cy))
@@ -278,7 +379,7 @@ def texto(slide, x, y, cx, cy, conteudo, tamanho, cor_do_texto="dk1",
         r.font.bold = negrito
         r.font.color.rgb = cor(prs, cor_do_texto)
         r.font._rPr.set("lang", IDIOMA)
-    return tb
+    return papel(tb, funcao) if funcao else tb
 
 
 def itens(slide, x, y, largura, conteudos, tamanho=16, cor_do_texto="dk1",

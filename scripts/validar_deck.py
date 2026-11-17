@@ -270,7 +270,8 @@ def analisa(caminho, detalhe=False, perfil_pedido=None):
         grade = {"esquerda": Inches(float(meta.get("margem_e", 0.5))),
                  "direita": Inches(float(meta.get("margem_d", 0.5))),
                  "familia": "arial"}
-        paleta = set(d["cores"].values()) | {"000000", "FFFFFF"}
+        paleta = (set(d["cores"].values()) | set(d["cores_usadas"])
+                  | {"000000", "FFFFFF"})
         fontes_permitidas = {d["fontes"]["titulo"], d["fontes"]["corpo"], None}
         fonte_do_tema = {"majorFont": d["fontes"]["titulo"],
                          "minorFont": d["fontes"]["corpo"]}
