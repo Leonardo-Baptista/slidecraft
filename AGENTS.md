@@ -177,6 +177,17 @@ imagem, GIF, vídeo, Morph). Só gere depois que a pessoa aprovar.
      (`"accent1"`, `"dk1"`, `"lt2"`). Número que sobe e linha do tempo
      funcionam igual, com `fundo` e `cor` vindos de `design(prs)["cores"]`.
      Termine cada slide com `limpar(s)`.
+   - **Design desenhado à mão**: muita apresentação não usa o tema nem os
+     espaços reservados; o visual está nos próprios slides. Sinais no
+     `design.json`: `cores_usadas` bem diferentes de `cores` (tema padrão do
+     Office), e `fundos` com cores escuras em alguns slides. Nesse caso:
+     use o layout `"em branco"`, desenhe o título com `texto(...)` no mesmo
+     corpo, cor e posição do original, pinte o fundo com
+     `kit.base.fundo(s, RGBColor.from_string("0B132B"))` nos slides que o
+     tinham, e use as cores de `cores_usadas` em hexadecimal. Rótulos e
+     legendas pequenos levam `funcao="rotulo"` ou `funcao="legenda"`.
+   - Posicione pelo `design(prs)`: `margem_esquerda`, `margem_direita`,
+     `largura` e `altura` são as do original, e é isso que o validador cobra.
    - **Passar para o padrão**: siga a seção 3 a partir do passo 2, usando o
      conteúdo do `conteudo.json` e as imagens de `assets/importado/`.
 5. **Produza e confira** como na seção 3, passos 5 a 7. Mostre à pessoa o
